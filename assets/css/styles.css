@@ -9851,49 +9851,83 @@ footer .footer-bottom::before {
 
 
 /* Globe canvas sizing & positioning */
+
+/* The card stretches to match the taller right-hand column, so the globe band
+   absorbs whatever height is left over. Without this the card's
+   `justify-content: space-between` dumps all the slack between the button and a
+   bottom-pinned globe. The band only reserves `min-height`, so the card is never
+   made taller than it already was. */
 .section-about-us .col-left {
   position: relative;
+  justify-content: flex-start;
+}
+.section-about-us .col-left .globe-wrap {
+  position: relative;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 250px;
+  margin-top: 24px;
 }
 
+/* cobe draws the sphere at 0.8 x the canvas HEIGHT and leaves the rest of the
+   canvas transparent, so the canvas spans the full card width and the card's own
+   rounded edge does the clipping - no canvas rectangle can show through.
+   Height (and therefore sphere size) is the larger of:
+     aspect-ratio  -> a multiple of the card width, so the sphere always stays
+                      wider than the card down to the card's bottom edge and
+                      bleeds past both sides however short the band is;
+     min-height    -> 2.1 x the band, i.e. sphere = 1.68 x the band, so a tall
+                      band shows a deep dome rather than a flat sliver.
+   translateY(-10%) lifts the canvas by exactly the transparent margin above the
+   sphere, putting the globe's top rim on the band's top edge. */
 #cobe-globe,
 #cobe-globe-about {
-  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  aspect-ratio: 4 / 7;
+  min-height: 210%;
+  transform: translateY(-10%);
   display: block;
-  align-self: center;
+  pointer-events: none;
+  z-index: 1;
 }
 
-@media (min-width: 1200px) {
+/* Two-column layout: the card is much narrower than it is tall, so a smaller
+   sphere relative to the card width still bleeds and gives a deeper dome. */
+@media (min-width: 992px) {
   #cobe-globe,
   #cobe-globe-about {
-    width: 550px !important;
-    height: 550px !important;
-    margin-top: 10px;
-    margin-bottom: -260px;
-    margin-left: auto;
-    margin-right: auto;
+    aspect-ratio: 7 / 10;
   }
 }
 
-@media (min-width: 768px) and (max-width: 1199px) {
-  #cobe-globe,
-  #cobe-globe-about {
-    width: 450px !important;
-    height: 450px !important;
-    margin-top: 10px;
-    margin-bottom: -210px;
-    margin-left: auto;
-    margin-right: auto;
+/* Single column: the card runs the full container width, so the band keeps the
+   height the old fixed-pixel canvas reserved here. */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .section-about-us .col-left .globe-wrap {
+    min-height: 270px;
   }
+}
+
+/* Gradient overlay to blend canvas edge into card background */
+.section-about-us .col-left::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to top, var(--neutral-900, #18181B) 0%, transparent 100%);
+  z-index: 2;
+  pointer-events: none;
+  border-radius: 0 0 40px 40px;
 }
 
 @media (max-width: 767px) {
-  #cobe-globe,
-  #cobe-globe-about {
-    width: 380px !important;
-    height: 380px !important;
-    margin-top: 5px;
-    margin-bottom: -170px;
-    margin-left: auto;
-    margin-right: auto;
+  .section-about-us .col-left .globe-wrap {
+    min-height: 250px;
+    margin-top: 16px;
   }
 }
